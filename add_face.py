@@ -19,7 +19,7 @@ async def add_face_core(robot):
    face_name = sys.argv[1] + " " + sys.argv[2]
    for visible_face in robot.world.visible_faces:
        #visible_face.rename_face(dsg.owner_name)
-       #await visible_face.name_face(face_name).wait_for_completed()
+       await visible_face.name_face(face_name).wait_for_completed()
        print(visible_face.expression)
 
 async def add_face_func(robot):

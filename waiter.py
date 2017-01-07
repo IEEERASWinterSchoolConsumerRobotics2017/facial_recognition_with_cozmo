@@ -12,7 +12,7 @@ from waiter_guard import WaiterGuard
 from robot_action import greeting, did_occur_recently, walk_around, process_intruder, waiting
 
 
-
+WORKING_HEAD_ANGLE = degrees(10)#10/180.0 * 3.14
 
 async def query_item(robot, dsg:WaiterGuard):
     
@@ -33,7 +33,12 @@ async def process_raw_face(robot, dsg:WaiterGuard):
     guest_face = None
     intruder_face = None
     for visible_face in robot.world.visible_faces:
-        if visible_face.name == dsg.guest_name:
+
+        if visible_face.name == dsg.maid_name:
+            dsg.check_for_item_flag = True
+
+        elif visible_face.name in dsg.guest_name:
+            dsg.current_name = visible_face.name
             if guest_face:
                 print("Multiple faces with name %s seen - %s and %s!" %
                       (dsg.guest_name, guest_face, visible_face))
@@ -101,7 +106,7 @@ async def waiter_guard(robot):
         await robot.drive_straight(distance_mm(150), speed_mmps(50)).wait_for_completed()
 
     # Tilt head up to look for people
-    await robot.set_head_angle(cozmo.robot.MAX_HEAD_ANGLE).wait_for_completed()
+    await robot.set_head_angle(WORKING_HEAD_ANGLE).wait_for_completed()
 
     initial_pose_angle = robot.pose_angle
 
@@ -111,7 +116,7 @@ async def waiter_guard(robot):
     # Time to wait between each turn and patrol, in seconds
     time_between_turns = 2.5
     time_between_patrols = 20
-    time_between_req_item = 1
+    time_between_req_item = 5
 
     time_for_next_turn = time.time() + time_between_turns
     time_for_next_patrol = time.time() + time_between_patrols
@@ -142,7 +147,6 @@ async def waiter_guard(robot):
             # Queue up the next time to patrol
         time_for_next_patrol = time.time() + time_between_patrols
         time_for_next_turn = time.time() + time_between_turns
-        time_for_next_req_items = time.time() + time_between_req_item
 
         # look for intruders
 
@@ -157,9 +161,11 @@ async def waiter_guard(robot):
 
 
         # check for items
-        if can_see_guest and dsg.check_for_item_flag and time.time() > time_for_next_req_items:
+        print(dsg.check_for_item_flag)
+        if dsg.check_for_item_flag and time.time() > time_for_next_req_items:
             #print("queried??")
             await query_item(robot, dsg)
+            time_for_next_req_items = time.time() + time_between_req_item
             #items = dsg.query_requested_items()
             #msg_str = "You ordered "
             #if items is not None:

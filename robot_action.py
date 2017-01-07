@@ -6,6 +6,9 @@ import time
 import cozmo
 from cozmo.util import degrees, distance_mm, speed_mmps
 
+
+WORKING_HEAD_ANGLE = degrees(10)#10/180.0 * 3.14
+
 def did_occur_recently(event_time, max_elapsed_time):
     '''Did event_time occur and was it within the last max_elapsed_time seconds?'''
     if event_time is None:
@@ -19,7 +22,7 @@ async def greeting(robot, dsg, guest_face):
     # check for items
     if dsg.guest_identified == False:
         print("guest is identified")
-        msg_str = "Hello " + dsg.guest_name
+        msg_str = "Hello " + dsg.current_name
         await robot.say_text(msg_str).wait_for_completed()
         dsg.set_guest_identified()
 
@@ -31,6 +34,8 @@ async def greeting(robot, dsg, guest_face):
         await robot.turn_towards_face(guest_face).wait_for_completed()
 
 async def process_intruder(robot, dsg, intruder_face):
+    if intruder_face is None:
+        return
     # Don't react unless this is a confirmed intruder
 
     is_confirmed_intruder = dsg.has_confirmed_intruder()
@@ -88,7 +93,7 @@ async def waiting(robot, dsg, time_for_next_turn, time_for_next_patrol,
                       time_between_turns,
                       time_between_patrols):
 
-    await robot.set_head_angle(cozmo.robot.MAX_HEAD_ANGLE).wait_for_completed()
+    await robot.set_head_angle(WORKING_HEAD_ANGLE).wait_for_completed()
     # Turn head every few seconds to cover a wider field of view
     # Only do this if not currently investigating an intruder
 
@@ -128,7 +133,7 @@ async def walk_around(robot, dsg, time_for_next_turn, time_for_next_patrol,
                       time_between_turns,
                       time_between_patrols):
 
-    await robot.set_head_angle(cozmo.robot.MAX_HEAD_ANGLE).wait_for_completed()
+    await robot.set_head_angle(WORKING_HEAD_ANGLE).wait_for_completed()
     # Turn head every few seconds to cover a wider field of view
     # Only do this if not currently investigating an intruder
 

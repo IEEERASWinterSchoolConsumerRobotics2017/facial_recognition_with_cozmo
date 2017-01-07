@@ -13,6 +13,8 @@ class WaiterGuard:
 
     def __init__(self):
         self.guest_name = None
+        self.maid_name = "Guoxiang Zhang"#"Cole Mortensen"
+        self.current_name = None
         self.guest_identified = False
 
         # This will be True after guest check-in and before cozmo get a list of items
@@ -35,14 +37,14 @@ class WaiterGuard:
 
     def query_guest_name(self):
         '''Query name of guest from server'''
-        name = "Guoxiang Zhang"
-        self.guest_name = name
-        return name
+        names = ["Dylan Wallace"]
+        self.guest_name = names
+        return names
 
     def set_guest_identified(self):
         assert self.guest_name is not None, "guest name should be queried at this point"
         self.guest_identified = True
-        self.check_for_item_flag = True
+        #self.check_for_item_flag = True
         tcp_funcs.guest_entered_room()
         self.is_waiting = False
 
